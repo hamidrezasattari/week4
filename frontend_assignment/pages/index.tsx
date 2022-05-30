@@ -1,13 +1,33 @@
 import detectEthereumProvider from "@metamask/detect-provider"
+import Greeter from "artifacts/contracts/Greeters.sol/Greeters.json";
 import { Strategy, ZkIdentity } from "@zk-kit/identity"
 import { generateMerkleProof, Semaphore } from "@zk-kit/protocols"
-import { providers } from "ethers"
+import { providers, Contract, utils } from "ethers"
 import Head from "next/head"
 import React from "react"
 import styles from "../styles/Home.module.css"
+import Form from "./Form";
+import {Typography,Button,Container,Card, CardActions,CardContent} from "@mui/material";
 
 export default function Home() {
     const [logs, setLogs] = React.useState("Connect your wallet and greet!")
+    const [greetingMessage, setGreetingMessage] = React.useState('');
+
+    React.useEffect(() => {
+        const greetingListener = async () => {
+        const prv = new providers.JsonRpcProvider("http://localhost:8545")
+        const greetingContract = new Contract(
+            '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+            Greeter.abi,
+            prv
+        )
+        greetingContract.on('NewGreeting', (greeting:string) => {
+              console.log('greeting>>>>>>>>>>>')
+              setGreetingMessage(utils.parseBytes32String(greeting))
+        })
+        }
+        greetingListener()
+      }, [])
 
     async function greet() {
         setLogs("Creating your Semaphore identity...")
@@ -59,25 +79,26 @@ export default function Home() {
         }
     }
 
-    return (
-        <div className={styles.container}>
+  return (
+    <div>
             <Head>
                 <title>Greetings</title>
                 <meta name="description" content="A simple Next.js/Hardhat privacy application with Semaphore." />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
-            <main className={styles.main}>
-                <h1 className={styles.title}>Greetings</h1>
-
-                <p className={styles.description}>A simple Next.js/Hardhat privacy application with Semaphore.</p>
-
-                <div className={styles.logs}>{logs}</div>
-
-                <div onClick={() => greet()} className={styles.button}>
-                    Greet
-                </div>
-            </main>
-        </div>
-    )
+      <Container component="main" maxWidth="400" sx={{ my: 4 }}>
+        <Form onSubmit={(data) => console.log(data)} />
+        <Card sx={{ mt: 6, minWidth: 400 }}>
+          <CardContent>
+            {greetingMessage && (<div>
+             <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom >Your Greeting </Typography>
+             <Typography>{greetingMessage}</Typography></div>)}
+            {!greetingMessage && <Typography>Greet your friends!</Typography>}
+          </CardContent>
+          {!greetingMessage && (<CardActions><Button size="small" onClick={greet}>Greet</Button></CardActions>)}
+        </Card>
+      </Container>
+    </div>
+  );
 }

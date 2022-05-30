@@ -4,6 +4,7 @@ pragma solidity ^0.8.4;
 import "@appliedzkp/semaphore-contracts/interfaces/IVerifier.sol";
 import "@appliedzkp/semaphore-contracts/base/SemaphoreCore.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol";
 
 /// @title Greeters contract.
 /// @dev The following code is just a example to show how Semaphore con be used.
@@ -19,6 +20,7 @@ contract Greeters is SemaphoreCore, Ownable {
     IVerifier public verifier;
 
     constructor(uint256 _greeters, address _verifier) {
+        console.log(">>>>>>>>constructor>>>Greeters");
         greeters = _greeters;
         verifier = IVerifier(_verifier);
     }
@@ -37,7 +39,7 @@ contract Greeters is SemaphoreCore, Ownable {
         // Prevent double-greeting (nullifierHash = hash(root + identityNullifier)).
         // Every user can greet once.
         _saveNullifierHash(_nullifierHash);
-
+        console.log(">>>>>>>>greet>>>>>>>>>>>>>>>>>>>Greeters");
         emit NewGreeting(_greeting);
     }
 }
